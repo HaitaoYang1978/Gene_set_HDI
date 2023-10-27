@@ -2,7 +2,7 @@
 ## Description
 Our proposed procedure aims to detect the set-based genetic variation (e.g., SNP-set, gene-set) associated with complex disease trait under a high-dimensional inference frame. Furthermore, We propose an omnibus testing procedure that employs a robust and powerful p-value combination method to enhance the power of set-based genetic variation association.
 ## Dependency
-Our proposed procedure relies on the package glmnet, future.apply, MASS, mvtnorm, devtools, ACAT and screening. All required package can be installed automatically in our procedure. In addition, all corresponding R functions of de-sparsified lasso method are in the './de-sparsified lasso functions' folder.
+Our proposed procedure relies on the `glmnet`  `future.apply` `MASS` `mvtnorm` `devtools` `ACAT` `screening`. All required package can be installed automatically in our procedure. In addition, all corresponding R functions of de-sparsified lasso method are in the *'./de-sparsified lasso functions'* folder.
 ## Usage
 A simple working example. We use a simulation data in our manuscript’s Simulation study’s CaseⅡ. Please run the R file, main_HOLP_HDI_Omnibus.R in which the analysis procedure of a random subset was illustrated. 
 ## Author
