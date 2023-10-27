@@ -4,7 +4,7 @@ Our proposed procedure aims to detect the set-based genetic variation (e.g., SNP
 ## Dependency
 Our proposed procedure relies on the `glmnet`  `future.apply` `MASS` `mvtnorm` `devtools` `ACAT` `screening`. All required package can be installed automatically in our procedure. In addition, all corresponding R functions of de-sparsified lasso method are in the *'./de-sparsified lasso functions'* folder.
 ## Usage
-A simple working example. We use a simulation data in our manuscript’s Simulation study’s CaseⅡ. Please run the R file, main_HOLP_HDI_Omnibus.R in which the analysis procedure of a random subset was illustrated. 
+A simple working example. We use a simulation data in our manuscript’s Simulation study’s CaseⅡ. Please run the R file, **main_HOLP_HDI_Omnibus.R** in which the analysis procedure of a random subset was illustrated. 
 ## Author
 Haitao Yang and Fuzhao Chen. We appreciate your feedback under issues of this repository.
 ## References
