@@ -1,4 +1,4 @@
-# Simulation-_real_SNP
+# Gene_set_HDI
 ## Description
 Our proposed procedure aims to detect the set-based genetic variation (e.g., SNP-set, gene-set) associated with complex disease trait under a high-dimensional inference frame. Furthermore, We propose an omnibus testing procedure that employs a robust and powerful p-value combination method to enhance the power of set-based genetic variation association.
 ## Dependency
