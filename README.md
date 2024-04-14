@@ -6,15 +6,18 @@ Our proposed procedure relies on the package `glmnet`  `future.apply` `MASS` `mv
 ## Usage
 Gene_set_HDI(X,Y,G_Var=G_var)
 ## Argument
-X        Predictors. An n by p matrix, p is the number of predictors. The predictors can be discrete (e.g., SNP 
-         genotype) or continuous (e.g., RNA-seq).
-Y        A response vector that can be discrete or continuous.
-G_Var    The location of genes or pathway
+| Value  | Description |
+|--------|-------------|
+|X |       Predictors. An n by p matrix, p is the number of predictors. The predictors can be discrete (e.g., SNP genotype) or continuous (e.g., RNA-seq).|
+|Y |      A response vector that can be discrete or continuous.|
+|G_Var |   The location of genes or pathway.|
 ## Value
-p_value   The original p values of SNPs within some a gene. A list. 
-MinP      The p value of each gene via the maximum statistics distribution. A vector.
-iART_A     The p value of each gene via the improved adaptative augmented rank truncation (iART-A). A vector.
-Min_O      The p value of each gene via Omnibus test based on MinP and iART-A
+| Value  | Description |
+|--------|-------------|
+| p_value | The original p values of SNPs within some a gene. A list. |
+| MinP    | The p value of each gene via the maximum statistics distribution. A vector.|
+| iART_A  | The p value of each gene via the improved adaptative augmented rank truncation (iART-A). A vector.|
+| Min_O   | The p value of each gene via Omnibus test based on MinP and iART-A.|
 ## Author(s)
 Haitao Yang and Fuzhao Chen. We appreciate your feedback under issues of this repository.
 ## References
