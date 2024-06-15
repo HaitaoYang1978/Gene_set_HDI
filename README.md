@@ -10,14 +10,14 @@ Gene_set_HDI(X,Y,G_Var=G_var)
 |--------|-------------|
 |X |       Predictors. An n by p matrix, p is the number of predictors. The predictors can be discrete (e.g., SNP genotype) or continuous (e.g., RNA-seq).|
 |Y |      A response vector that can be discrete or continuous.|
-|G_Var |   The location of genes or pathway.|
+|G_Var |  The location of SNPs mapped to genes. A list contains genes with mapped SNPs to be tested.|
 ## Value
 | Value  | Description |
 |--------|-------------|
-| p_value | The original p values of SNPs within some a gene. A list. |
-| MinP    | The p value of each gene via the maximum statistics distribution. A vector.|
-| iART_A  | The p value of each gene via the improved adaptative augmented rank truncation (iART-A). A vector.|
-| Min_O   | The p value of each gene via Omnibus test based on MinP and iART-A.|
+| p_value | The original p values of SNPs located in the different genes. A list.  |
+| MinP    | The p-value of each gene based on the maximum statistics distribution. A vector.|
+| iART_A  | The p-value of each gene based on the improved adaptative augmented rank truncation (iART-A). A vector.|
+| Min_O   | The p-value of each gene obtained from the omnibus test based on MinP and iART-A.|
 ## Author(s)
 Haitao Yang and Fuzhao Chen. We appreciate your feedback under issues of this repository.
 ## References
@@ -28,7 +28,7 @@ Haitao Yang and Fuzhao Chen. We appreciate your feedback under issues of this re
 5. Zhang CH, Zhang SS. Confidence intervals for low dimensional parameters in high dimensional linear models, Journal of the Royal Statistical Society: Series B (Statistical Methodology) 2014;76:217-242.
 6. Van de Geer S, Bühlmann P, Ritov Ya et al. On asymptotically optimal confidence regions and tests for high-dimensional models, The Annals of Statistics 2014;42:1166-1202.
 
-## Tutorial based on a toy data of SNP genotype
+## Tutorial based on an example of SNP genotype data
 A simple working toy data, a 600×992 matrix consisting of two genes and a phenotype. There are 168 SNPs in gene 1 and 823 SNPs in gene 2. the gene2 is set to be associated with the phenotype dependent on the cumulative weak signal model (CWSM).
 ### Set Working Directory and random seed
 ```
@@ -77,16 +77,210 @@ sapply(paste0("./de-sparsified lasso functions/",files.sources), source)
 `source('Example_data.R')`
 ### Mapping the SNPs to the genes
 ```
-# The real SNPs data can be mapped to genes by using biomaRt package 
-total_SNP_name<-colnames(X)
-gene1_name<-colnames(X)[1:168]
-gene2_name<-colnames(X)[169:991]
+# The simulation SNPs data 
+total_SNP_name<-colnames(X) # get the names of all SNPs
+gene1_name<-colnames(X)[1:168] # the first 168 SNPs are contained in the gene1
+gene2_name<-colnames(X)[169:991]# the remaining 823 SNPs are contained in the gene2
 G1_location<-which(total_SNP_name %in% gene1_name)
 G2_location<-which(total_SNP_name %in% gene2_name)
-G_Var<-list(G1_location,G2_location)
+G_Var<-list(G1_location,G2_location) # locate the gene1 and gene2
 names(G_Var)<-c('gene1','gene2')
+
+# The real SNPs data can be mapped to genes by using biomaRt package
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("biomaRt")
+X<-readRDS('X_98.RDS') # There are 98 SNPs as the predictors in the data matrix X
+SNP.ID.d<-colnames(X)
+library(biomaRt)# need to run R4 in linux server
+mart.snp<-useMart("ENSEMBL_MART_SNP","hsapiens_snp",host="grch37.ensembl.org",
+path="/biomart/martservice")
+getENSG <- function(rs = rs, mart = mart.snp) {
+  results<-getBM(attributes=c("refsnp_id","ensembl_gene_stable_id", "ensembl_gene_name","chr_name","chrom_start","chrom_end","minor_allele"),
+                   filters = "snp_filter", values = rs, mart = mart)
+  return(results)
+}
+# supply rs ID
+ENSG<-getENSG(rs = SNP.ID.d)
+ENSG.null.ID<-which(ENSG[,2]=="",arr.ind=TRUE)
+ENSG.mapping<-ENSG[-ENSG.null.ID,]
+
+ENS.ID<-unique(ENSG.mapping$ensembl_gene_stable_id) # The 98 SNPS are mapped to 23 genes with Ensembl ID 
+[ 1] "ENSG00000240453" "ENSG00000069424" "ENSG00000116254" "ENSG00000215912"
+[ 5] "ENSG00000078900" "ENSG00000227589" "ENSG00000171735" "ENSG00000116288"
+[ 9] "ENSG00000049246" "ENSG00000142611" "ENSG00000162592" "ENSG00000162426"
+[13] "ENSG00000228794" "ENSG00000196581" "ENSG00000169598" "ENSG00000236266"
+[17] "ENSG00000233304" "ENSG00000142599" "ENSG00000238290" "ENSG00000232596"
+[21] "ENSG00000130762" "ENSG00000116151" "ENSG00000142606"
+
+SNP.ID<-list()
+for (i in 1:length(ENS.ID)) {
+  print(i)
+ENSG.mapping$ensembl_gene_stable_id
+SNP.ID[[i]]<-which(ENSG.mapping$ensembl_gene_stable_id==ENS.ID[i])
+}
+SNP.SET<-list()
+for (i in 1:length(ENS.ID)) {
+  print(i)
+SNP.SET[[i]]<-ENSG.mapping$refsnp_id[SNP.ID[[i]]]
+}
+names(SNP.SET)<-ENS.ID # the gene name is the Ensemble ID
+SNP.SET
+$ENSG00000240453
+[1] "rs3094315"
+
+$ENSG00000069424
+[1] "rs3789541"
+
+$ENSG00000116254
+[1] "rs3810993"
+
+$ENSG00000215912
+[1] "rs4648390"
+
+$ENSG00000078900
+[1] "rs4648545"
+
+$ENSG00000227589
+[1] "rs4648545"
+
+$ENSG00000171735
+[ 1] "rs4908445"  "rs4908608"  "rs916393"   "rs1044245"  "rs1193167"
+[ 6] "rs12088178" "rs11120896" "rs11120972" "rs6680365"  "rs6688732"
+[11] "rs1476047"  "rs1618346"  "rs1750836"  "rs1750838"  "rs2478266"
+[16] "rs2478267"  "rs17030993" "rs17349921" "rs12058103"
+
+$ENSG00000116288
+[1] "rs4908488"
+
+$ENSG00000049246
+[1] "rs228682"   "rs10462020" "rs10462021"
+
+$ENSG00000142611
+[1] "rs946758"   "rs2483256"  "rs12024847"
+
+$ENSG00000162592
+[1] "rs1181877"
+
+$ENSG00000162426
+[1] "rs12132135"
+
+$ENSG00000228794
+[1] "rs12562034"
+
+$ENSG00000196581
+[1] "rs12567266" "rs17421247"
+
+$ENSG00000169598
+[1] "rs12738235" "rs10797348"
+
+$ENSG00000236266
+[1] "rs10462020"
+
+$ENSG00000233304
+[1] "rs10799202" "rs7519349"  "rs7519458"  "rs11583257"
+
+$ENSG00000142599
+[1] "rs11121179" "rs11121181"
+
+$ENSG00000238290
+[1] "rs7523335" "rs7537362"
+
+$ENSG00000232596
+[1] "rs2078573"
+
+$ENSG00000130762
+[1] "rs2185639" "rs2487680"
+
+$ENSG00000116151
+[1] "rs2643891"
+
+$ENSG00000142606
+[1] "rs11590198"
+Group_test<-list()
+for (i in 1:length(ENS.ID)) {
+  print(i)
+Group_test[[i]]<-which(SNP.ID.d %in% SNP.SET[[i]])
+}
+# Get the SNP location in hdi model
+G_Var<-list()
+for (i in 1:length(ENS.ID)){
+  print(i)
+G_Var[[i]]<-which(colnames(X) %in%SNP.ID.d[Group_test[[i]]])
+}
+names(G_Var)<-ENS.ID
+$ENSG00000240453
+[1] 1
+
+$ENSG00000069424
+[1] 61
+
+$ENSG00000116254
+[1] 63
+
+$ENSG00000215912
+[1] 6
+
+$ENSG00000078900
+[1] 19
+
+$ENSG00000227589
+[1] 19
+
+$ENSG00000171735
+ [1] 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82
+
+$ENSG00000116288
+[1] 87
+
+$ENSG00000049246
+[1] 83 84 85
+
+$ENSG00000142611
+[1]  9 10 11
+
+$ENSG00000162592
+[1] 20
+
+$ENSG00000162426
+[1] 96
+
+$ENSG00000228794
+[1] 2
+
+$ENSG00000196581
+[1] 39 40
+
+$ENSG00000169598
+[1] 22 23
+
+$ENSG00000236266
+[1] 84
+
+$ENSG00000233304
+[1] 24 25 26 27
+
+$ENSG00000142599
+[1] 97 98
+
+$ENSG00000238290
+[1] 88 89
+
+$ENSG00000232596
+[1] 37
+
+$ENSG00000130762
+[1] 15 16
+
+$ENSG00000116151
+[1] 4
+
+$ENSG00000142606
+[1] 5
+
+
 ```
-### Testing the genes
+### Testing the genes(for the simulation SNPs data)
 ```
 source('Gene_set_HDI_function.R')
 Gene_set_HDI(X,Y,G_Var=G_var)
@@ -124,6 +318,6 @@ $Min_O
      gene1      gene2 
 0.90055371 0.01101687
 ```
-When the significant level is 0.05 , The p value (Min_O) of gene2 via Omnibus test based on MinP and iART-Athe gene2 is significant, which is consistent with the setup of example data. However, The p value (MinP) of gene2 via the maximum statistics distribution is not significant.
+In the cumulative weak signal model (CWSM), the power of the maximum statistic distribution is theoretically lower than that of iART-A. In this example data, The p-value (MinP) of gene2 is not significant, however, the p-value (iART_A) of gene2 is significant and the p-value (Min_O) of gene2 is close to the p-value (iART_A) and also significant, which is consistent with the setup of example data. 
 
 
